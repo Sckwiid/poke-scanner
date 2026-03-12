@@ -11,7 +11,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20 # <-- IL FAUT METTRE 20 ICI
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci # <-- 'npm ci' est plus propre que 'install' sur GitHub
 
       - name: Install Expo CLI
         run: npm install -g expo-cli
