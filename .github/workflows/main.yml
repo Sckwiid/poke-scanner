@@ -1,0 +1,26 @@
+name: Build Android APK
+on: [push] # Compile à chaque fois que tu modifies le code
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Expo CLI
+        run: npm install -g expo-cli
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build APK (Preview)
+        run: npx expo export --platform android
+        
+      # Note : Pour un vrai APK installable sans passer par le store
+      # On utilise souvent EAS Build qui est plus simple avec GitHub.
