@@ -24,6 +24,9 @@ jobs:
 
       - name: Build APK (Preview)
         run: npx expo export --platform android
+
+      - name: Install Dependencies
+        run: npm install
         
       # Note : Pour un vrai APK installable sans passer par le store
       # On utilise souvent EAS Build qui est plus simple avec GitHub.
