@@ -1,5 +1,5 @@
 name: Build Android APK
-on: [push] # Compile à chaque fois que tu modifies le code
+on: [push]
 
 jobs:
   build:
@@ -14,19 +14,9 @@ jobs:
           node-version: 20
 
       - name: Install Dependencies
-        run: npm ci # <-- 'npm ci' est plus propre que 'install' sur GitHub
-
-      - name: Install Expo CLI
-        run: npm install -g expo-cli
-
-      - name: Install Dependencies
+        # On utilise 'npm install' au lieu de 'npm ci' car tu n'as pas de lockfile
         run: npm install
 
-      - name: Build APK (Preview)
+      - name: Export Project
+        # On exporte le projet pour Android
         run: npx expo export --platform android
-
-      - name: Install Dependencies
-        run: npm install
-        
-      # Note : Pour un vrai APK installable sans passer par le store
-      # On utilise souvent EAS Build qui est plus simple avec GitHub.
