@@ -43,24 +43,6 @@ const normalize = (value = '') =>
 
 const cleanSpaces = (value = '') => value.replace(/\s+/g, '');
 
-const isRenderableComponent = (Comp) => {
-  if (!Comp) return false;
-  if (typeof Comp === 'function') return true;
-  if (typeof Comp === 'object') {
-    return Boolean(Comp.$$typeof) || typeof Comp.render === 'function';
-  }
-  return false;
-};
-
-let OptionalLegacyCamera = null;
-try {
-  const legacyPackage = require('expo-camera/legacy');
-  OptionalLegacyCamera = legacyPackage?.Camera || legacyPackage?.default || null;
-} catch {
-  OptionalLegacyCamera = null;
-}
-const HAS_LEGACY_OCR = isRenderableComponent(OptionalLegacyCamera);
-
 const extractCardClues = (rawText = '') => {
   const text = rawText.replace(/\r/g, '\n');
 
@@ -304,12 +286,6 @@ export default function App() {
       setScanPulse((prev) => (prev + 1) % 4);
     }, 650);
     return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    if (!HAS_LEGACY_OCR) {
-      setScanStatus('OCR texte auto non supporte ici. Utilise Rechercher avec nom + local ID.');
-    }
   }, []);
 
   useEffect(() => {
@@ -571,21 +547,6 @@ export default function App() {
     [runAutoScan]
   );
 
-  const onLegacyTextRecognized = useCallback(
-    (event) => {
-      const payload = event?.nativeEvent || event || {};
-      const blocks = payload?.textBlocks || [];
-      const fromBlocks = blocks
-        .map((b) => b?.value || b?.text || '')
-        .filter(Boolean)
-        .join('\n')
-        .trim();
-      const rawText = fromBlocks || payload?.text || '';
-      if (rawText) runAutoScan(rawText, 'ocr');
-    },
-    [runAutoScan]
-  );
-
   const runSearch = useCallback(async () => {
     const name = searchName.trim();
     const localId = searchLocalId.trim();
@@ -626,32 +587,17 @@ export default function App() {
     ? `Scan actif${'.'.repeat((scanPulse % 3) + 1)}`
     : 'Scan en pause';
 
-  const renderCamera = () => {
-    if (HAS_LEGACY_OCR) {
-      const LegacyCamera = OptionalLegacyCamera;
-      return (
-        <LegacyCamera
-          ref={cameraRef}
-          style={StyleSheet.absoluteFill}
-          onTextRecognized={onLegacyTextRecognized}
-          onBarCodeScanned={onBarcodeScanned}
-          ratio="16:9"
-        />
-      );
-    }
-
-    return (
-      <CameraView
-        ref={cameraRef}
-        style={StyleSheet.absoluteFill}
-        facing="back"
-        onBarcodeScanned={onBarcodeScanned}
-        barcodeScannerSettings={{
-          barcodeTypes: ['qr', 'code128', 'code39', 'ean13', 'ean8', 'upc_a', 'upc_e'],
-        }}
-      />
-    );
-  };
+  const renderCamera = () => (
+    <CameraView
+      ref={cameraRef}
+      style={StyleSheet.absoluteFill}
+      facing="back"
+      onBarcodeScanned={onBarcodeScanned}
+      barcodeScannerSettings={{
+        barcodeTypes: ['qr', 'code128', 'code39', 'ean13', 'ean8', 'upc_a', 'upc_e'],
+      }}
+    />
+  );
 
   const renderScanTab = () => (
     <View style={styles.cameraWrap}>
@@ -662,11 +608,7 @@ export default function App() {
       </View>
 
       <View style={styles.scanPanel}>
-        <Text style={styles.engineText}>
-          {HAS_LEGACY_OCR
-            ? 'OCR auto disponible (legacy)'
-            : 'OCR texte indisponible en Expo Go, detection barcode uniquement'}
-        </Text>
+        <Text style={styles.engineText}> Scan auto actif (codes). OCR texte complet necessite un Dev Build Expo. </Text>
 
         <Text style={styles.liveText}>{scanIndicator}</Text>
         <Text style={styles.statusText}>{scanStatus}</Text>
@@ -1248,3 +1190,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+
+
+
+
